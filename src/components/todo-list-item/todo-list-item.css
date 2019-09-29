@@ -1,0 +1,23 @@
+.task-item {
+   
+    margin:0;
+    list-style: none;
+}
+
+.task-info {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+}
+
+.task-done-bg {
+    background: #68d3be !important;
+}
+
+.task-done-line {
+    text-decoration: line-through;
+}
+
+.task-imp {
+    color: yellow;
+}
