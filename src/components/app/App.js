@@ -4,6 +4,7 @@ import AppHeader from '../app-header';
 import SearchPanel from '../search-panel';
 import TodoList from '../todo-list';
 import NewTask from '../new-task';
+import FilterPanel from '../filter-panel';
 
 class App extends Component{
   constructor(){
@@ -16,7 +17,8 @@ class App extends Component{
         this.createdataTodoItem('Drink Coffe'),
         this.createdataTodoItem('Learn')
       ],
-      search: ''
+      search: '',
+      filter: 'all'
     }
   }
 
@@ -75,30 +77,76 @@ class App extends Component{
     } );
   }
 
+  //получает сторку из поиска
+  //записываеь эту строку в state
   onSearchTask = (str) => {
     this.setState({
       search: str
     });
   }
 
-  //функция получает фразу для  поиска и возвращает подходящие элементы
-  filterData(allItems, str){
+  //получает список всех элементов и фразу из поиска
+  searchData(allItems, str){
     if(str.length === 0) return allItems;
     return allItems.filter( (item) => {
       return item.task.toLowerCase().indexOf(str.toLowerCase()) !== -1
     } );
   }
 
+  //функция получает all || imp || done и записываем в state
+  onFilterTasks = (str) => {
+    this.setState({
+      filter: str
+    });
+  }
+
+  //функция получает все элементы списка с учетом фильтрации по строке поиска и еще один параметр для фильтрации
+  //функция возвращает список элеметонов, который зависит от строки поиска и от кнопок-фильтов
+  filterData = (data, filter) => {
+    if(filter === 'all') return data;
+    if (filter === 'act'){
+      return data.filter( (item) => !item.done )
+    }
+    if (filter === 'done'){
+      return data.filter( (item) => item.done )
+    }
+  }
+
   render(){
-    let {dataTodo, search} = this.state;
-    let showData = this.filterData(dataTodo, search);
+    let {dataTodo, search, filter} = this.state;
+    let showData = this.filterData(this.searchData(dataTodo, search), filter);
+    
+    let totalT = dataTodo.length;
+    let doneT = dataTodo.reduce( (sum, item) => {
+      if (item.done) sum ++;
+      return sum;
+    },0 );
+    let importT = dataTodo.reduce( (sum, item) => {
+      if (item.important) sum ++;
+      return sum;
+    },0 );
 
     return (
       <div className="jumbotron">
-        <AppHeader/>
-        <SearchPanel
-          searchTask = {this.onSearchTask}
-        />
+        <AppHeader
+          imp = {importT}
+          done = {doneT} 
+          total = {totalT - doneT}/>
+        <div className='container-fluid'>
+          <div className="row">
+            <div class="col-lg-6">
+              <SearchPanel
+                searchTask = {this.onSearchTask}
+              />
+            </div>
+            <div class="col-lg-6">
+              <FilterPanel
+                filterTasks = {this.onFilterTasks}
+                filterStatus = {this.state.filter} 
+              />
+            </div>
+          </div>
+        </div>
         <TodoList 
           todos = {showData}
           delTask = {this.onDelTask}
